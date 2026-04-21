@@ -69,7 +69,9 @@ module "networking_vpc" {
 
   # Networking VPC propagates into egress-rt only.
   # Spokes will propagate into egress-rt so return traffic works.
-  propagate_to_route_table_ids = [module.transit_gateway.rt_egress_id]
+  propagate_to_route_table_ids = {
+    egress = module.transit_gateway.rt_egress_id
+  }
 
   public_subnets = [
     { cidr = "10.3.1.0/24", az = var.availability_zones[0] },
@@ -82,6 +84,7 @@ module "networking_vpc" {
   ]
 
   spoke_cidr_supernet = "10.0.0.0/8"
+  enable_flow_logs    = true
   flow_log_bucket_arn = module.flow_logs.bucket_arn
   tags                = local.common_tags
 }
@@ -108,11 +111,11 @@ module "production_vpc" {
 
   associate_route_table_id = module.transit_gateway.rt_production_id
 
-  propagate_to_route_table_ids = [
-    module.transit_gateway.rt_production_id,      # prod routes known in prod-rt
-    module.transit_gateway.rt_shared_services_id, # shared services can route back to prod
-    module.transit_gateway.rt_egress_id,          # NAT GW return traffic can reach prod
-  ]
+  propagate_to_route_table_ids = {
+    production      = module.transit_gateway.rt_production_id      # prod routes known in prod-rt
+    shared_services = module.transit_gateway.rt_shared_services_id # shared services can route back to prod
+    egress          = module.transit_gateway.rt_egress_id          # NAT GW return traffic can reach prod
+  }
 
   workload_subnets = [
     { cidr = "10.0.1.0/24", az = var.availability_zones[0] },
@@ -130,6 +133,7 @@ module "production_vpc" {
     { cidr = "10.0.100.16/28", az = var.availability_zones[1] },
   ]
 
+  enable_flow_logs    = true
   flow_log_bucket_arn = module.flow_logs.bucket_arn
   tags                = local.common_tags
 }
@@ -156,11 +160,11 @@ module "dev_vpc" {
 
   associate_route_table_id = module.transit_gateway.rt_nonproduction_id
 
-  propagate_to_route_table_ids = [
-    module.transit_gateway.rt_nonproduction_id,   # dev routes known in nonprod-rt
-    module.transit_gateway.rt_shared_services_id, # shared services can route back to dev
-    module.transit_gateway.rt_egress_id,          # NAT GW return traffic can reach dev
-  ]
+  propagate_to_route_table_ids = {
+    nonproduction   = module.transit_gateway.rt_nonproduction_id   # dev routes known in nonprod-rt
+    shared_services = module.transit_gateway.rt_shared_services_id # shared services can route back to dev
+    egress          = module.transit_gateway.rt_egress_id          # NAT GW return traffic can reach dev
+  }
 
   workload_subnets = [
     { cidr = "10.1.1.0/24", az = var.availability_zones[0] },
@@ -175,6 +179,7 @@ module "dev_vpc" {
     { cidr = "10.1.100.16/28", az = var.availability_zones[1] },
   ]
 
+  enable_flow_logs    = true
   flow_log_bucket_arn = module.flow_logs.bucket_arn
   tags                = local.common_tags
 }
@@ -204,12 +209,12 @@ module "shared_services_vpc" {
 
   associate_route_table_id = module.transit_gateway.rt_shared_services_id
 
-  propagate_to_route_table_ids = [
-    module.transit_gateway.rt_production_id,      # prod can reach shared services
-    module.transit_gateway.rt_nonproduction_id,   # dev can reach shared services
-    module.transit_gateway.rt_shared_services_id, # self
-    module.transit_gateway.rt_egress_id,          # NAT GW return traffic
-  ]
+  propagate_to_route_table_ids = {
+    production      = module.transit_gateway.rt_production_id      # prod can reach shared services
+    nonproduction   = module.transit_gateway.rt_nonproduction_id   # dev can reach shared services
+    shared_services = module.transit_gateway.rt_shared_services_id # self
+    egress          = module.transit_gateway.rt_egress_id          # NAT GW return traffic
+  }
 
   workload_subnets = [
     { cidr = "10.2.1.0/24", az = var.availability_zones[0] },
@@ -223,6 +228,7 @@ module "shared_services_vpc" {
     { cidr = "10.2.100.16/28", az = var.availability_zones[1] },
   ]
 
+  enable_flow_logs    = true
   flow_log_bucket_arn = module.flow_logs.bucket_arn
   tags                = local.common_tags
 }

@@ -124,6 +124,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "flow_logs" {
     id     = "flow-log-lifecycle"
     status = "Enabled"
 
+    filter {}
+
     transition {
       days          = 90
       storage_class = "STANDARD_IA"

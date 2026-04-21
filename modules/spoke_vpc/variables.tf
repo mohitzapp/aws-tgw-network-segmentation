@@ -29,8 +29,8 @@ variable "associate_route_table_id" {
 }
 
 variable "propagate_to_route_table_ids" {
-  description = "List of TGW route table IDs to propagate this VPC's CIDR into. Controls which other segments can reach this VPC."
-  type        = list(string)
+  description = "Map of label → TGW route table ID to propagate this VPC's CIDR into. Keys must be static strings (used as for_each keys); values are the RT IDs."
+  type        = map(string)
 }
 
 variable "workload_subnets" {
@@ -59,9 +59,15 @@ variable "tgw_subnets" {
 }
 
 variable "flow_log_bucket_arn" {
-  description = "ARN of the central S3 bucket for VPC flow logs. Set to empty string to disable flow logging."
+  description = "ARN of the central S3 bucket for VPC flow logs."
   type        = string
   default     = ""
+}
+
+variable "enable_flow_logs" {
+  description = "Set to true to enable VPC flow logs to the central S3 bucket."
+  type        = bool
+  default     = true
 }
 
 variable "tags" {

@@ -137,7 +137,7 @@ resource "aws_ec2_transit_gateway_route_table_association" "this" {
 ###############################################################################
 
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
-  for_each = toset(var.propagate_to_route_table_ids)
+  for_each = var.propagate_to_route_table_ids
 
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this.id
   transit_gateway_route_table_id = each.value
@@ -231,7 +231,7 @@ resource "aws_route_table_association" "tgw" {
 ###############################################################################
 
 resource "aws_flow_log" "this" {
-  count = var.flow_log_bucket_arn != "" ? 1 : 0
+  count = var.enable_flow_logs ? 1 : 0
 
   vpc_id               = aws_vpc.this.id
   traffic_type         = "ALL"
