@@ -1,0 +1,42 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is git-ignored — never commit real values.
+
+###############################################################################
+# Required
+###############################################################################
+
+# Short prefix used in all resource names. Keep it lowercase, no spaces.
+prefix = "lab2-healthcare"
+
+###############################################################################
+# Optional — override defaults
+###############################################################################
+
+aws_region = "us-east-1"
+
+# AZs to use. Two is sufficient for the lab; three for production HA.
+availability_zones = ["us-east-1a", "us-east-1b"]
+
+# VPC CIDR blocks — must not overlap
+production_vpc_cidr      = "10.0.0.0/16"
+dev_vpc_cidr             = "10.1.0.0/16"
+shared_services_vpc_cidr = "10.2.0.0/16"
+networking_vpc_cidr      = "10.3.0.0/16"
+
+# Single NAT GW saves ~$32/month in the lab. Set to false for HA (one per AZ).
+single_nat_gateway = true
+
+# Allow terraform destroy to remove the flow logs bucket even if it has objects.
+# Set to false before promoting to production.
+flow_log_force_destroy_bucket = true
+
+# Ownership tags
+owner       = "platform-engineering"
+cost_center = "infra-labs"
+
+# HIPAA / compliance labels (optional)
+extra_tags = {
+  DataClassification = "PHI"
+  ComplianceScope    = "HIPAA,PCI-DSS"
+  BackupPolicy       = "daily"
+}
